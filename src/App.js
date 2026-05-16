@@ -38,7 +38,7 @@ const App = () => {
                             title: "Le Resume",
                             paragraphs: [
                                 "I'll just shamelessly plug my resume here.",
-                                "Also, feel free to check out my LinkedIn and Google Drive!",
+                                "Also, feel free to check out my LinkedIn and GitHub!",
                             ]
                         },
                     ]}
