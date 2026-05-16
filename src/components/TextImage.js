@@ -1,4 +1,5 @@
 import React from 'react';
+import '../styles/TextImage.css';
 
 const TextImage = ({ id, image, aboutContent, borderRadius, width, height, buttons, link}) => {
     return (

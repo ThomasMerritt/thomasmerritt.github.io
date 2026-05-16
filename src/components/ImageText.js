@@ -1,4 +1,5 @@
 import React from 'react';
+import '../styles/ImageText.css';
 
 const ImageText = ({ id, image, sections }) => {
     return (

@@ -1,9 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ParallaxProvider, Parallax } from 'react-scroll-parallax';
+import '../styles/Footer.css';
 import scape_no_human from '../scape-no-human.jpg';
 import resume from '../Resume.pdf';
 
 const Footer = () => {
+    useEffect(() => {
+        const footer = document.getElementsByClassName('footer-links-wrapper')[0];
+        if (footer) footer.classList.toggle('fade');
+    }, []);
+
     return (
         <ParallaxProvider>
             <Parallax y={[-10, 10]}>
