@@ -6,7 +6,7 @@ import CharacterInformation from './components/CharacterInformation';
 import ImageText from './components/ImageText';
 import TextImage from './components/TextImage';
 import Footer from './components/Footer';
-import face from './face.jpeg';
+import days from './10000_days.jpg';
 import cursed from './cursed_image.JPEG';
 import path from './path.jpg';
 import resume from './Resume.pdf';
@@ -25,13 +25,14 @@ const App = () => {
                             title: "Heyo!",
                             description: [
                                 "Feel free to look around! I'm not watching...",
+                                "Yet anyways. <⁠(⁠￣⁠︶⁠￣⁠)⁠>",
                             ]
                         }
                     ]}
                 />
                 <TextImage
                     id="about-section"
-                    image={face}
+                    image={days}
                     aboutContent={[
                         {
                             title: "Le Resume",
@@ -42,7 +43,7 @@ const App = () => {
                         },
                     ]}
                     buttons={[
-                        { className: 'button-container', text: 'ʕノ•ᴥ•ʔノ ︵ ┻━┻' },
+                        { className: 'button-container', text: '(╯°□°)╯︵ ┻━┻' },
                     ]}
                     link={resume}
                 />
@@ -56,7 +57,9 @@ const App = () => {
                         {
                             title: "le Drive",
                             paragraphs: [
-                                "Things I'm doing on the side."
+                                "Things I'm doing on the side.",
+                                "Feel free to check it out!",
+                                "Don't worry, it's absolutely virus free. ദ്ദി(ᵔᗜᵔ)",
                             ]
                         },
                        
