@@ -1,0 +1,99 @@
+.music-player {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 4;
+  opacity: 0.35;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.music-player:hover,
+.music-player.open,
+.music-player:focus-within {
+  opacity: 1;
+}
+
+.music-player-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.music-toggle {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.music-toggle svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: white;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.music-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(8, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 17px;
+  padding: 0 8px;
+  height: 34px;
+}
+
+.music-controls button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  line-height: 1;
+  padding: 2px 6px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.music-controls button:hover {
+  opacity: 1;
+}
+
+.music-track-label {
+  color: white;
+  font-size: 12px;
+  max-width: 150px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.music-frame {
+  display: block;
+  width: 280px;
+  height: 166px;
+  margin-top: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  background: #08172A;
+}
+
+@media screen and (max-width: 480px) {
+  .music-frame {
+      width: 220px;
+      height: 116px;
+  }
+
+  .music-track-label {
+      max-width: 90px;
+  }
+}

@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Slider from './components/Slider';
 import Footer from './components/Footer';
 import ScrollIndicator from './components/ScrollIndicator';
+import MusicPlayer from './components/MusicPlayer';
 
 const App = () => {
     return (
@@ -12,6 +13,7 @@ const App = () => {
             <Slider />
             <Footer />
             <ScrollIndicator />
+            <MusicPlayer />
         </div>
     );
 };
