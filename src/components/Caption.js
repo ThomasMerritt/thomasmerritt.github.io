@@ -17,9 +17,6 @@ const Caption = () => {
     const [captionIndex, setCaptionIndex] = useState(0);
 
     useEffect(() => {
-        const captionElement = document.getElementById('caption');
-        captionElement.classList.toggle('fade');
-
         const shuffleArray = (array) => {
             for (let i = array.length - 1; i > 0; i--) {
                 let j = Math.floor(Math.random() * (i + 1));
@@ -44,14 +41,7 @@ const Caption = () => {
         return () => clearInterval(interval);
     }, []);
 
-    return (
-        <h1
-            id="caption"
-            style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-        >
-            {caption}
-        </h1>
-    );
+    return <h1 id="caption">{caption}</h1>;
 };
 
 export default Caption;

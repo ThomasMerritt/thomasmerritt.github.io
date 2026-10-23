@@ -5,8 +5,16 @@
   font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
+html,
 body {
   overflow-x: hidden;
+  /* dark backdrop so there is no white flash before the app mounts */
+  background-color: #08172A;
+}
+
+.page {
+  position: relative;
+  z-index: 0;
 }
 
 .container {
