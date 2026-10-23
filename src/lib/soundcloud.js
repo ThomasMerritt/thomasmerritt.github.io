@@ -36,13 +36,13 @@ export function parseSoundCloudUrl(rawUrl) {
  * Builds the player URL from a fixed origin. Returns null when the permalink is
  * not a valid SoundCloud resource.
  */
-export function buildPlayerUrl(rawUrl) {
+export function buildPlayerUrl(rawUrl, { autoPlay = false } = {}) {
     const permalink = parseSoundCloudUrl(rawUrl);
     if (!permalink) return null;
 
     const params = new URLSearchParams({
         url: permalink,
-        auto_play: 'false',
+        auto_play: autoPlay ? 'true' : 'false',
         hide_related: 'true',
         show_comments: 'false',
         show_user: 'false',
@@ -63,10 +63,11 @@ export function sanitisePlaylist(entries) {
 
     return entries
         .map((entry) => {
-            const url = entry && buildPlayerUrl(entry.url);
-            if (!url) return null;
+            const permalink = entry && parseSoundCloudUrl(entry.url);
+            if (!permalink) return null;
             return {
-                url,
+                permalink,
+                url: buildPlayerUrl(permalink),
                 label: entry.label && typeof entry.label === 'string'
                     ? entry.label.slice(0, 120)
                     : 'Untitled',

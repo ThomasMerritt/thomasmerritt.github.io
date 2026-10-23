@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, within, act } from '@testing-library/react';
+import { render, screen, within, act, fireEvent } from '@testing-library/react';
 import App from './App';
 
 const realRect = Element.prototype.getBoundingClientRect;
@@ -37,6 +37,60 @@ test('indicator points down while the links are below the fold', () => {
 
     const indicator = screen.getByRole('button', { name: 'Scroll to links' });
     expect(indicator).not.toHaveClass('up');
+});
+
+describe('music consent', () => {
+    beforeEach(() => {
+        window.localStorage.clear();
+    });
+
+    test('asks before loading any player', () => {
+        stubLinksTop(() => window.innerHeight + 100);
+        render(<App />);
+
+        expect(screen.getByRole('dialog', { name: 'Play music?' })).toBeInTheDocument();
+        expect(document.querySelector('.music-frame')).toBeNull();
+    });
+
+    test('allowing loads the player and is remembered', () => {
+        stubLinksTop(() => window.innerHeight + 100);
+        render(<App />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Play music' }));
+
+        expect(screen.queryByRole('dialog')).toBeNull();
+        expect(document.querySelector('.music-frame')).not.toBeNull();
+        expect(window.localStorage.getItem('music-consent')).toBe('granted');
+    });
+
+    test('declining loads nothing and is remembered', () => {
+        stubLinksTop(() => window.innerHeight + 100);
+        render(<App />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'No thanks' }));
+
+        expect(screen.queryByRole('dialog')).toBeNull();
+        expect(document.querySelector('.music-frame')).toBeNull();
+        expect(window.localStorage.getItem('music-consent')).toBe('denied');
+    });
+
+    test('a stored decision skips the prompt', () => {
+        window.localStorage.setItem('music-consent', 'granted');
+        stubLinksTop(() => window.innerHeight + 100);
+        render(<App />);
+
+        expect(screen.queryByRole('dialog')).toBeNull();
+    });
+
+    test('a prior refusal can be reopened from the note button', () => {
+        window.localStorage.setItem('music-consent', 'denied');
+        stubLinksTop(() => window.innerHeight + 100);
+        render(<App />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Open music player' }));
+
+        expect(screen.getByRole('dialog', { name: 'Play music?' })).toBeInTheDocument();
+    });
 });
 
 test('indicator rotates up once the links are in view', () => {
