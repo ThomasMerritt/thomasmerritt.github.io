@@ -1,9 +1,14 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn/i);
-  expect(linkElement).toBeInTheDocument();
+test('renders the header image and the footer links', () => {
+    render(<App />);
+
+    expect(within(screen.getByRole('banner')).getByAltText('Scape')).toBeInTheDocument();
+
+    const footer = screen.getByRole('contentinfo');
+    ['EMAIL', 'LINKEDIN', 'RESUME', 'GITHUB'].forEach((label) => {
+        expect(footer).toHaveTextContent(label);
+    });
 });

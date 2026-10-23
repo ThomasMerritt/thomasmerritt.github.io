@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Power3, gsap } from 'gsap';
 import '../styles/Header.css';
 import Caption from './Caption';
-import scape from '../scape.jpg';
+import scape from '../assets/images/scape.jpg';
 
 const Header = () => {
     const canvasRef = useRef(null);

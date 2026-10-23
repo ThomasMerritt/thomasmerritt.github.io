@@ -1,15 +1,15 @@
 import React from "react";
 import { ParallaxProvider, Parallax } from 'react-scroll-parallax';
 import '../styles/Footer.css';
-import scape_no_human from '../scape-no-human.jpg';
-import resume from '../Resume.pdf';
+import scapeNoHuman from '../assets/images/scape-no-human.jpg';
+import resume from '../assets/documents/Resume.pdf';
 
 const Footer = () => {
     return (
         <ParallaxProvider>
             <Parallax y={[-10, 10]}>
                 <footer id='footer-links-navigation-point' className='footer-links-wrapper' style={{
-                    background: `linear-gradient(rgba(9, 23, 42), rgba(0, 0, 0, 0.2)),url(${scape_no_human}) no-repeat center center`,
+                    background: `linear-gradient(rgba(9, 23, 42), rgba(0, 0, 0, 0.2)),url(${scapeNoHuman}) no-repeat center center`,
                     backgroundSize: 'cover',
                     color: '#fff',
                     textAlign: 'center'

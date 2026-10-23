@@ -15,3 +15,5 @@ build/
 .env.development
 
 package-lock.json
+# macOS metadata
+.DS_Store
