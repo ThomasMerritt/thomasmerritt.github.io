@@ -3,6 +3,7 @@ import './styles/App.css';
 import Header from './components/Header';
 import Slider from './components/Slider';
 import Footer from './components/Footer';
+import ScrollIndicator from './components/ScrollIndicator';
 
 const App = () => {
     return (
@@ -10,6 +11,7 @@ const App = () => {
             <Header />
             <Slider />
             <Footer />
+            <ScrollIndicator />
         </div>
     );
 };
