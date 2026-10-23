@@ -8,7 +8,12 @@ const Header = () => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
-        gsap.timeline().fromTo(canvasRef.current, 2, { height: "0%" }, { height: "80%", ease: Power3.easeInOut });
+        // Reveal by clipping rather than animating height, which would squash the image.
+        gsap.fromTo(
+            canvasRef.current,
+            { clipPath: 'inset(50% 0% 50% 0%)' },
+            { clipPath: 'inset(0% 0% 0% 0%)', duration: 2, ease: Power3.easeInOut }
+        );
     }, []);
 
     return (

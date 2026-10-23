@@ -4,20 +4,23 @@ header {
 
 section {
   display: flex;
-  height: 80vh;
+  height: 100vh;
   justify-content: center;
   align-items: center;
 }
 
+/* 90% wide leaves a 5vw gutter on each side, so the height is inset by the
+   same 5vw top and bottom to keep the image equidistant from all edges. */
 .canvas {
   width: 90%;
-  display: inline-block;
+  height: calc(100vh - 10vw);
+  overflow: hidden;
+  border-radius: 20px;
 }
 
 .canvas img {
-  height: 112%;
+  height: 100%;
   width: 100%;
   object-fit: cover;
-  align-self: center;
-  border-radius: 20px;
+  display: block;
 }
