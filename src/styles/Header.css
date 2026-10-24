@@ -12,10 +12,14 @@ section {
 /* 90% wide leaves a 5vw gutter on each side, so the height is inset by the
    same 5vw top and bottom to keep the image equidistant from all edges. */
 .canvas {
+  position: relative;
   width: 90%;
   height: calc(100vh - 10vw);
   overflow: hidden;
   border-radius: 20px;
+  /* Keeps the grain's screen blending inside the canvas instead of blending
+     with the page behind it. */
+  isolation: isolate;
 }
 
 .canvas img {
@@ -23,4 +27,50 @@ section {
   width: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* The clips overlay the image rather than replacing it in layout, so the canvas
+   keeps its size and the reveal animation is unaffected. They stay mounted so
+   the browser can keep them decoded between cycles. */
+.canvas-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  pointer-events: none;
+}
+
+header.showing .canvas img {
+  visibility: hidden;
+}
+
+/* Hidden rather than unmounted, so the caption's rotation timer keeps running
+   and it does not blank out for several seconds after every flash. */
+header.showing #caption {
+  visibility: hidden;
+}
+
+header.leader .canvas-leader {
+  opacity: 1;
+  z-index: 2;
+}
+
+header.flash .canvas-flash {
+  opacity: 1;
+  z-index: 1;
+}
+
+/* The grain clip is near-black with bright specks, so screen blending adds the
+   specks over the frozen frame without hiding it. */
+header.grain .canvas-flash {
+  opacity: 1;
+  z-index: 1;
+}
+
+header.grain .canvas-grain {
+  opacity: 1;
+  z-index: 3;
+  mix-blend-mode: screen;
 }

@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import '../styles/ScrollIndicator.css';
-
-const prefersReducedMotion = () =>
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+import { prefersReducedMotion } from '../lib/motion';
 
 const scrollTo = (options) => {
     const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
