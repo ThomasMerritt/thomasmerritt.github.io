@@ -1,9 +1,19 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import '../styles/MusicPlayer.css';
 import MusicConsent, { readConsent, rememberConsent } from './MusicConsent';
-import { buildPlayerUrl, sanitisePlaylist } from '../lib/soundcloud';
+import { buildPlayerUrl, randomTrackIndex, sanitisePlaylist } from '../lib/soundcloud';
 import { sendCommand, subscribeToPlaybackState } from '../lib/widgetApi';
 import playlistConfig from '../config/playlist.json';
+
+/**
+ * Drawn rather than typed: text chevrons sit on the font's baseline, which is a
+ * couple of pixels off the label's centre, so they looked misaligned.
+ */
+const Chevron = ({ direction }) => (
+    <svg className={`music-chevron${direction === 'right' ? ' right' : ''}`} viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+        <path d="M8 2 4 6l4 4" />
+    </svg>
+);
 
 /**
  * The widget is only mounted once music is allowed, so visitors who never play
@@ -13,11 +23,15 @@ const MusicPlayer = () => {
     const tracks = useMemo(() => sanitisePlaylist(playlistConfig.tracks), []);
     const [consent, setConsent] = useState(readConsent);
     const [mounted, setMounted] = useState(() => readConsent() === true);
-    const [autoPlay, setAutoPlay] = useState(false);
+    // A stored allowance means the widget should start on its own; visitors
+    // who have never decided still get the prompt first.
+    const [autoPlay, setAutoPlay] = useState(() => readConsent() === true);
     const [playing, setPlaying] = useState(false);
-    const [index, setIndex] = useState(0);
+    // Lazy so the choice is made once per page load rather than on every render.
+    const [index, setIndex] = useState(() => randomTrackIndex(tracks.length));
     const frameRef = useRef(null);
     const allowRef = useRef(null);
+    const unlockArmed = useRef(true);
 
     useEffect(() => {
         if (index > 0 && index >= tracks.length) setIndex(0);
@@ -34,6 +48,34 @@ const MusicPlayer = () => {
     useEffect(() => {
         if (consent === null && allowRef.current) allowRef.current.focus();
     }, [consent]);
+
+    // Autoplay can still be refused by the browser on a reload, so the first
+    // interaction anywhere starts playback instead of leaving it silent. This
+    // is armed only for that initial attempt: once the visitor has taken manual
+    // control, or music has started, a later pause must stay paused.
+    useEffect(() => {
+        if (!mounted || playing || !unlockArmed.current) return undefined;
+
+        const unlock = (event) => {
+            // Clicking the note is handled by the button itself; unlocking here
+            // too would start and immediately pause the track, since pointerdown
+            // arrives before click.
+            if (event && event.target.closest && event.target.closest('.music-player')) return;
+            if (!unlockArmed.current) return;
+
+            unlockArmed.current = false;
+            sendCommand(frameRef.current, 'play');
+            setPlaying(true);
+        };
+
+        window.addEventListener('pointerdown', unlock);
+        window.addEventListener('keydown', unlock);
+        return () => {
+            window.removeEventListener('pointerdown', unlock);
+            window.removeEventListener('keydown', unlock);
+        };
+    }, [mounted, playing]);
+
 
     useEffect(() => {
         if (consent !== null) return undefined;
@@ -54,7 +96,10 @@ const MusicPlayer = () => {
 
     const step = (delta) => setIndex((prev) => (prev + delta + tracks.length) % tracks.length);
 
-    const toggle = (method) => sendCommand(frameRef.current, method);
+    const toggle = (method) => {
+        unlockArmed.current = false;
+        sendCommand(frameRef.current, method);
+    };
 
     // An auto-playing widget emits `play` before our listener can bind, so the
     // icon is set optimistically and corrected by subsequent events.
@@ -121,7 +166,7 @@ const MusicPlayer = () => {
                             aria-label="Previous track"
                             onClick={() => step(-1)}
                         >
-                            ‹
+                            <Chevron direction="left" />
                         </button>
                     )}
                     <span className="music-track-label">
@@ -136,7 +181,7 @@ const MusicPlayer = () => {
                             aria-label="Next track"
                             onClick={() => step(1)}
                         >
-                            ›
+                            <Chevron direction="right" />
                         </button>
                     )}
                 </div>

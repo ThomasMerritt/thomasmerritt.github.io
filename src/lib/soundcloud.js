@@ -90,3 +90,13 @@ export function sanitisePlaylist(entries) {
         })
         .filter(Boolean);
 }
+
+/**
+ * Picks a track to start on. Returns 0 for an empty or single-item playlist so
+ * callers never have to guard against a negative or out-of-range index.
+ */
+export function randomTrackIndex(count) {
+    if (!Number.isInteger(count) || count < 2) return 0;
+
+    return Math.floor(Math.random() * count);
+}

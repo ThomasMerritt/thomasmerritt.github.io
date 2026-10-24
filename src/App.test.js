@@ -3,8 +3,14 @@ import { render, screen, within, act, fireEvent } from '@testing-library/react';
 import App from './App';
 import playlistConfig from './config/playlist.json';
 
-// Derived so editing the playlist does not break the suite.
-const firstTrackTitle = playlistConfig.tracks[0].title;
+// The player starts on a random track, so match any of them rather than a
+// fixed index, which would make the suite flaky. Titles contain regex
+// metacharacters ("D.T.F.N. (feat. Cise Starr)"), so escape before joining.
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const anyTrackTitle = () => playlistConfig.tracks
+    .map((track) => escapeRegExp(track.title))
+    .join('|');
 
 const realRect = Element.prototype.getBoundingClientRect;
 
@@ -78,13 +84,13 @@ describe('music consent', () => {
         expect(src).toContain('auto_play=true');
     });
 
-    test('a returning visitor gets the widget but not autoplay', () => {
+    test('a returning visitor gets the widget already autoplaying', () => {
         window.localStorage.setItem('music-consent', 'granted');
         stubLinksTop(() => window.innerHeight + 100);
         render(<App />);
 
         const src = document.querySelector('.music-frame').getAttribute('src');
-        expect(src).toContain('auto_play=false');
+        expect(src).toContain('auto_play=true');
     });
 
     test('declining loads nothing and is remembered', () => {
@@ -111,7 +117,7 @@ describe('music consent', () => {
         stubLinksTop(() => window.innerHeight + 100);
         render(<App />);
 
-        fireEvent.click(screen.getByRole('button', { name: new RegExp(firstTrackTitle) }));
+        fireEvent.click(screen.getByRole('button', { name: new RegExp(`Play (${anyTrackTitle()})`) }));
 
         expect(screen.getByRole('dialog', { name: 'Play music?' })).toBeInTheDocument();
     });
