@@ -1,3 +1,6 @@
+/* The pill is one shape: the border and background live here, so the circle
+   and the revealed label share an outline. Collapsed it is 38px wide, which
+   makes the pill radius render as a circle. */
 .music-player {
   position: fixed;
   top: 18px;
@@ -5,6 +8,10 @@
   z-index: 4;
   display: flex;
   align-items: center;
+  height: 38px;
+  background: rgba(8, 23, 42, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
   opacity: 0.45;
   transition: opacity 0.3s ease-in-out;
 }
@@ -15,7 +22,6 @@
 }
 
 .music-toggle {
-  position: relative;
   flex: 0 0 auto;
   width: 38px;
   height: 38px;
@@ -23,11 +29,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 23, 42, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: none;
+  border: none;
   border-radius: 50%;
   cursor: pointer;
-  z-index: 1;
 }
 
 .music-icon {
@@ -40,8 +45,8 @@
   stroke-linejoin: round;
 }
 
-/* While playing, the whole circle turns; the note icon turns with it. */
-.music-player.playing .music-toggle {
+/* While playing the note turns inside the circle. */
+.music-player.playing .music-icon {
   animation: music-spin 6s linear infinite;
 }
 
@@ -58,11 +63,6 @@
   gap: 2px;
   max-width: 0;
   overflow: hidden;
-  margin-left: -1px;
-  background: rgba(8, 23, 42, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-left: none;
-  border-radius: 0 19px 19px 0;
   height: 38px;
   white-space: nowrap;
   opacity: 0;
@@ -78,7 +78,7 @@
 .music-track-label {
   color: white;
   font-size: 13px;
-  padding: 0 14px 0 12px;
+  padding: 0 16px 0 4px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -100,7 +100,7 @@
 }
 
 .music-step:first-child {
-  margin-left: 8px;
+  margin-left: 6px;
 }
 
 .music-step:hover {
@@ -121,7 +121,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .music-player.playing .music-toggle {
+  .music-player.playing .music-icon {
       animation: none;
   }
 }

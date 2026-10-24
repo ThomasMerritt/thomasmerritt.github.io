@@ -1,6 +1,10 @@
 import React from 'react';
 import { render, screen, within, act, fireEvent } from '@testing-library/react';
 import App from './App';
+import playlistConfig from './config/playlist.json';
+
+// Derived so editing the playlist does not break the suite.
+const firstTrackTitle = playlistConfig.tracks[0].title;
 
 const realRect = Element.prototype.getBoundingClientRect;
 
@@ -107,7 +111,7 @@ describe('music consent', () => {
         stubLinksTop(() => window.innerHeight + 100);
         render(<App />);
 
-        fireEvent.click(screen.getByRole('button', { name: /Lux Aeterna/ }));
+        fireEvent.click(screen.getByRole('button', { name: new RegExp(firstTrackTitle) }));
 
         expect(screen.getByRole('dialog', { name: 'Play music?' })).toBeInTheDocument();
     });
