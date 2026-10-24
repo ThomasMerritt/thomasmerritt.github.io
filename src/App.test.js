@@ -63,6 +63,26 @@ describe('music consent', () => {
         expect(window.localStorage.getItem('music-consent')).toBe('granted');
     });
 
+    test('the mounted widget is addressed to the player origin so it accepts commands', () => {
+        stubLinksTop(() => window.innerHeight + 100);
+        render(<App />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Play music' }));
+
+        const src = document.querySelector('.music-frame').getAttribute('src');
+        expect(src.startsWith('https://w.soundcloud.com/player/')).toBe(true);
+        expect(src).toContain('auto_play=true');
+    });
+
+    test('a returning visitor gets the widget but not autoplay', () => {
+        window.localStorage.setItem('music-consent', 'granted');
+        stubLinksTop(() => window.innerHeight + 100);
+        render(<App />);
+
+        const src = document.querySelector('.music-frame').getAttribute('src');
+        expect(src).toContain('auto_play=false');
+    });
+
     test('declining loads nothing and is remembered', () => {
         stubLinksTop(() => window.innerHeight + 100);
         render(<App />);
@@ -87,7 +107,7 @@ describe('music consent', () => {
         stubLinksTop(() => window.innerHeight + 100);
         render(<App />);
 
-        fireEvent.click(screen.getByRole('button', { name: 'Open music player' }));
+        fireEvent.click(screen.getByRole('button', { name: /Lux Aeterna/ }));
 
         expect(screen.getByRole('dialog', { name: 'Play music?' })).toBeInTheDocument();
     });

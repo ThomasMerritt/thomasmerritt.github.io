@@ -3,9 +3,15 @@
 // the page embed an arbitrary third-party site.
 export const WIDGET_ORIGIN = 'https://w.soundcloud.com';
 
+// The widget API expects messages addressed to the player document's own
+// origin, which is this base without the query string.
+export const WIDGET_BASE = `${WIDGET_ORIGIN}/player`;
+
 const ALLOWED_HOSTS = new Set(['soundcloud.com', 'www.soundcloud.com']);
 
 const MAX_URL_LENGTH = 2048;
+
+const MAX_LABEL_LENGTH = 120;
 
 /**
  * Accepts only an https SoundCloud permalink. Returns the normalised permalink
@@ -36,7 +42,7 @@ export function parseSoundCloudUrl(rawUrl) {
  * Builds the player URL from a fixed origin. Returns null when the permalink is
  * not a valid SoundCloud resource.
  */
-export function buildPlayerUrl(rawUrl, { autoPlay = false } = {}) {
+export function buildPlayerUrl(rawUrl, { autoPlay = false, origin } = {}) {
     const permalink = parseSoundCloudUrl(rawUrl);
     if (!permalink) return null;
 
@@ -51,8 +57,17 @@ export function buildPlayerUrl(rawUrl, { autoPlay = false } = {}) {
         visual: 'false',
     });
 
-    return `${WIDGET_ORIGIN}/player/?${params.toString()}`;
+    // The widget only accepts API commands when it knows the embedding origin.
+    if (origin) params.set('origin', origin);
+
+    return `${WIDGET_BASE}/?${params.toString()}`;
 }
+
+const cleanText = (value, fallback) => {
+    if (typeof value !== 'string') return fallback;
+    const trimmed = value.trim();
+    return trimmed ? trimmed.slice(0, MAX_LABEL_LENGTH) : fallback;
+};
 
 /**
  * Filters a raw playlist down to entries with a usable permalink, so one bad
@@ -68,9 +83,9 @@ export function sanitisePlaylist(entries) {
             return {
                 permalink,
                 url: buildPlayerUrl(permalink),
-                label: entry.label && typeof entry.label === 'string'
-                    ? entry.label.slice(0, 120)
-                    : 'Untitled',
+                title: cleanText(entry.title, 'Untitled'),
+                artist: cleanText(entry.artist, ''),
+                label: cleanText(entry.label, cleanText(entry.title, 'Untitled')),
             };
         })
         .filter(Boolean);

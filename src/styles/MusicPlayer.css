@@ -3,36 +3,34 @@
   top: 18px;
   left: 18px;
   z-index: 4;
-  opacity: 0.35;
+  display: flex;
+  align-items: center;
+  opacity: 0.45;
   transition: opacity 0.3s ease-in-out;
 }
 
 .music-player:hover,
-.music-player.open,
 .music-player:focus-within {
   opacity: 1;
 }
 
-.music-player-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .music-toggle {
-  width: 34px;
-  height: 34px;
+  position: relative;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 23, 42, 0.6);
+  background: rgba(8, 23, 42, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 50%;
   cursor: pointer;
+  z-index: 1;
 }
 
-.music-toggle svg {
+.music-icon {
   width: 17px;
   height: 17px;
   fill: none;
@@ -42,58 +40,88 @@
   stroke-linejoin: round;
 }
 
-.music-controls {
+/* While playing, the whole circle turns; the note icon turns with it. */
+.music-player.playing .music-toggle {
+  animation: music-spin 6s linear infinite;
+}
+
+@keyframes music-spin {
+  to {
+      transform: rotate(360deg);
+  }
+}
+
+/* Hover (or keyboard focus) opens the pill to the right of the circle. */
+.music-reveal {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(8, 23, 42, 0.6);
+  gap: 2px;
+  max-width: 0;
+  overflow: hidden;
+  margin-left: -1px;
+  background: rgba(8, 23, 42, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 17px;
-  padding: 0 8px;
-  height: 34px;
+  border-left: none;
+  border-radius: 0 19px 19px 0;
+  height: 38px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: max-width 0.35s ease-in-out, opacity 0.25s ease-in-out;
 }
 
-.music-controls button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
-  line-height: 1;
-  padding: 2px 6px;
-  cursor: pointer;
-  opacity: 0.7;
-}
-
-.music-controls button:hover {
+.music-player:hover .music-reveal,
+.music-player:focus-within .music-reveal {
+  max-width: 320px;
   opacity: 1;
 }
 
 .music-track-label {
   color: white;
-  font-size: 12px;
-  max-width: 150px;
+  font-size: 13px;
+  padding: 0 14px 0 12px;
   overflow: hidden;
-  white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.music-frame {
-  display: block;
-  width: 280px;
-  height: 166px;
-  margin-top: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 8px;
-  background: #08172A;
+.music-separator {
+  opacity: 0.6;
 }
 
-@media screen and (max-width: 480px) {
-  .music-frame {
-      width: 220px;
-      height: 116px;
-  }
+.music-step {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 19px;
+  line-height: 1;
+  padding: 0 5px;
+  cursor: pointer;
+  opacity: 0.65;
+}
 
-  .music-track-label {
-      max-width: 90px;
+.music-step:first-child {
+  margin-left: 8px;
+}
+
+.music-step:hover {
+  opacity: 1;
+}
+
+/* The widget is the audio engine, not visible UI: it stays rendered so the
+   browser keeps playing it, but out of sight. */
+.music-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-player.playing .music-toggle {
+      animation: none;
   }
 }

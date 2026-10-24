@@ -2,24 +2,35 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import '../styles/MusicPlayer.css';
 import MusicConsent, { readConsent, rememberConsent } from './MusicConsent';
 import { buildPlayerUrl, sanitisePlaylist } from '../lib/soundcloud';
+import { sendCommand, subscribeToPlaybackState } from '../lib/widgetApi';
 import playlistConfig from '../config/playlist.json';
 
 /**
- * The widget is only mounted once the panel is opened, so visitors who never
- * play music never load third-party content or hand SoundCloud a page view.
+ * The widget is only mounted once music is allowed, so visitors who never play
+ * music never load third-party content or hand SoundCloud a page view.
  */
 const MusicPlayer = () => {
     const tracks = useMemo(() => sanitisePlaylist(playlistConfig.tracks), []);
     const [consent, setConsent] = useState(readConsent);
-    const [open, setOpen] = useState(false);
+    const [mounted, setMounted] = useState(() => readConsent() === true);
+    const [autoPlay, setAutoPlay] = useState(false);
+    const [playing, setPlaying] = useState(false);
     const [index, setIndex] = useState(0);
+    const frameRef = useRef(null);
     const allowRef = useRef(null);
 
     useEffect(() => {
         if (index > 0 && index >= tracks.length) setIndex(0);
     }, [tracks.length, index]);
 
-    // Move focus into the dialog so keyboard users are not left behind it.
+    // Bound to the widget's own `ready` signal, so it does not matter whether
+    // the iframe document finishes loading before or after this effect runs.
+    useEffect(() => {
+        if (!mounted) return undefined;
+
+        return subscribeToPlaybackState(frameRef.current, setPlaying);
+    }, [mounted, index]);
+
     useEffect(() => {
         if (consent === null && allowRef.current) allowRef.current.focus();
     }, [consent]);
@@ -39,32 +50,48 @@ const MusicPlayer = () => {
     if (!tracks.length) return null;
 
     const track = tracks[index];
-    const multiple = tracks.length > 1;
     const asking = consent === null;
 
     const step = (delta) => setIndex((prev) => (prev + delta + tracks.length) % tracks.length);
 
+    const toggle = (method) => sendCommand(frameRef.current, method);
+
+    // An auto-playing widget emits `play` before our listener can bind, so the
+    // icon is set optimistically and corrected by subsequent events.
+    const startPlayback = () => {
+        setAutoPlay(true);
+        setMounted(true);
+        setPlaying(true);
+    };
+
+    const onToggleClick = () => {
+        if (asking) {
+            setConsent(null);
+            return;
+        }
+        if (consent === false) {
+            setConsent(null);
+            return;
+        }
+        if (!mounted) {
+            // Mounting happens inside the click handler, so the widget is
+            // allowed to start here even though a restore-on-load is not.
+            startPlayback();
+            return;
+        }
+        toggle('toggle');
+    };
+
     const allow = () => {
         rememberConsent(true);
         setConsent(true);
-        setOpen(true);
+        startPlayback();
     };
 
     const dismiss = () => {
         rememberConsent(false);
         setConsent(false);
-        setOpen(false);
-    };
-
-    // Someone who previously declined gets the prompt again rather than being
-    // silently locked out of the player.
-    const onToggle = () => {
-        if (asking) return;
-        if (consent === false) {
-            setConsent(null);
-            return;
-        }
-        setOpen((prev) => !prev);
+        setMounted(false);
     };
 
     return (
@@ -72,34 +99,56 @@ const MusicPlayer = () => {
             {asking && (
                 <MusicConsent onAllow={allow} onDismiss={dismiss} allowRef={allowRef} />
             )}
-            <div className={`music-player${open ? ' open' : ''}`}>
-                <div className="music-player-bar">
-                    <button
-                        type="button"
-                        className="music-toggle"
-                        aria-expanded={open}
-                        aria-label={open ? 'Close music player' : 'Open music player'}
-                        onClick={onToggle}
-                    >
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M9 18V5l10-2v13" />
-                            <circle cx="6" cy="18" r="3" />
-                            <circle cx="16" cy="16" r="3" />
-                        </svg>
-                    </button>
-                    {open && multiple && (
-                        <span className="music-controls">
-                            <button type="button" onClick={() => step(-1)} aria-label="Previous track">‹</button>
-                            <span className="music-track-label" title={track.label}>{track.label}</span>
-                            <button type="button" onClick={() => step(1)} aria-label="Next track">›</button>
-                        </span>
+            <div className={`music-player${playing ? ' playing' : ''}`}>
+                <button
+                    type="button"
+                    className="music-toggle"
+                    aria-pressed={playing}
+                    aria-label={playing ? `Pause ${track.title}` : `Play ${track.title}`}
+                    onClick={onToggleClick}
+                >
+                    <svg className="music-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M9 18V5l10-2v13" />
+                        <circle cx="6" cy="18" r="3" />
+                        <circle cx="16" cy="16" r="3" />
+                    </svg>
+                </button>
+                <div className="music-reveal">
+                    {tracks.length > 1 && (
+                        <button
+                            type="button"
+                            className="music-step"
+                            aria-label="Previous track"
+                            onClick={() => step(-1)}
+                        >
+                            ‹
+                        </button>
+                    )}
+                    <span className="music-track-label">
+                        {track.title}
+                        {track.artist && <span className="music-separator"> · </span>}
+                        {track.artist}
+                    </span>
+                    {tracks.length > 1 && (
+                        <button
+                            type="button"
+                            className="music-step"
+                            aria-label="Next track"
+                            onClick={() => step(1)}
+                        >
+                            ›
+                        </button>
                     )}
                 </div>
-                {open && (
+                {mounted && (
                     <iframe
+                        ref={frameRef}
                         className="music-frame"
-                        title={track.label}
-                        src={buildPlayerUrl(track.permalink, { autoPlay: consent === true })}
+                        title={`${track.title} by ${track.artist || 'SoundCloud'}`}
+                        src={buildPlayerUrl(track.permalink, {
+                            autoPlay,
+                            origin: window.location.origin,
+                        })}
                         scrolling="no"
                         frameBorder="0"
                         allow="autoplay"
